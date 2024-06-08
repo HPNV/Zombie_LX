@@ -1,5 +1,6 @@
 import GameObject from '../module/character/GameObject';
 import SceneEngine from '../module/engine/SceneEngine';
+import Global from '../module/helper/Global';
 import Projectile from './projectile';
 
 export default class Player extends GameObject {
@@ -12,12 +13,14 @@ export default class Player extends GameObject {
     level: number;
     exp: number;
     bullets: Projectile[];
-    skillList: string[];
     bulletCount: number;
     reloadTime: number;
+    image: ImageBitmap | null;
+    movingLeft: boolean;
+    damage: number;
 
-    constructor(name: string,x: number,y: number) {
-        super({x: 0, y: 0, width: 32, height: 75});
+    constructor(name: string, x: number, y: number) {
+        super({ x: 0, y: 0, width: 100, height: 100 });
         this.name = name;
         this.speed = 0.2;
         this.x = x;
@@ -26,22 +29,35 @@ export default class Player extends GameObject {
         this.exp = 0;
         this.health = 100;
         this.bullets = [];
-        this.skillList = ["speed","attack","health","exp","ammo","reload"];
         this.bulletCount = 5;
         this.reloadTime = 5000;
+        this.image = Global.getInstance().assetManager.loadedImage["Player"];
+        this.movingLeft = false;
+        this.damage = 10;
     }
-    
+
     draw(ctx: CanvasRenderingContext2D, time: Number): void {
-        ctx.fillStyle = "red";
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        if (this.image) {
+            ctx.save();
+            if (this.movingLeft) {
+                ctx.scale(-1, 1);
+                ctx.drawImage(this.image, -this.x - this.width, this.y, this.width, this.height);
+            } else {
+                ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+            }
+            ctx.restore();
+        } else {
+            ctx.fillStyle = "red";
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
     }
 
     update(): void {
-        if(this.health <= 0){
+        if (this.health <= 0) {
             SceneEngine.getInstance().currentScene.destroyGameObject(this);
         }
 
-        if(this.exp >= 100){
+        if (this.exp >= 100) {
             this.level += 1;
             this.exp = this.exp - 100;
         }
@@ -53,24 +69,28 @@ export default class Player extends GameObject {
         var left = keys.has("a");
         var right = keys.has("d");
 
-
-        if(up && right){
+        if (up && right) {
             this.y -= this.speed;
             this.x += this.speed;
-        } else if(up && left){
+        } else if (up && left) {
             this.y -= this.speed;
             this.x -= this.speed;
-        } else if(down && right){
+        } else if (down && right) {
             this.y += this.speed;
-            this.x+= this.speed;
+            this.x += this.speed;
+        } else if (down && left) {
+            this.y += this.speed;
+            this.x -= this.speed;
         } else if (up) {
             this.y -= this.speed;
         } else if (down) {
             this.y += this.speed;
         } else if (left) {
             this.x -= this.speed;
+            this.movingLeft = true;
         } else if (right) {
             this.x += this.speed;
+            this.movingLeft = false;
         }
     }
 
@@ -81,12 +101,12 @@ export default class Player extends GameObject {
         });
     }
 
-    attack(mouseX:number,mouseY: number): Projectile {
+    attack(mouseX: number, mouseY: number): Projectile {
         var angle = Math.atan2(mouseY - this.y, mouseX - this.x);
         var dx = Math.cos(angle);
         var dy = Math.sin(angle);
         this.x += dx;
         this.y += dy;
-        return new Projectile(this.x, this.y, angle,2,10);
+        return new Projectile(this.x, this.y, angle, 2, this.damage, "bullet");
     }
 }

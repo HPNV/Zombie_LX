@@ -10,9 +10,16 @@ window.onload = () =>{
                 sceneEngine.makeWindowReactive();
 
                 let assetManager = Global.getInstance().assetManager;
+                
+                assetManager.addImagePath("bullet","Player/Bullet.png");
+                assetManager.addImagePath("Zombie","Enemy/Zombie.png");
+                assetManager.addImagePath("Player","Player/Player.png");
+                assetManager.addImagePath("gameover","Helper/Game Over.png");
+                assetManager.addAudioPath("PlayMusic","PlayMusic.mp3");
+                assetManager.addImagePath("Card","Helper/Card.png");
 
                 for(let i = 1; i < 10; i++){
-                        assetManager.addPath("tile"+i,"tiles/FieldsTile_0"+i+".png");
+                        assetManager.addImagePath("tile"+i,"tiles/FieldsTile_0"+i+".png");
                 }
         
                 assetManager.addAssetDoneListener(() => {
@@ -21,7 +28,7 @@ window.onload = () =>{
                         sceneEngine.start();
                 });
                 
-                assetManager.loadAsset();
+                assetManager.loadAssets();
 
         }
         init();
