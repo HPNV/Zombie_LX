@@ -43,4 +43,20 @@ export default class Map extends GameObject{
             }
         }
     }
+
+    getBottom() {
+        return this.y + this.height;
+    }
+
+    getRight() {
+        return this.x + this.width;
+    }
+
+    getLeft() {
+        return this.x;
+    }
+
+    getTop() {
+        return this.y;
+    }
 }

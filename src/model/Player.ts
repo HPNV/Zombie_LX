@@ -9,7 +9,12 @@ export default class Player extends GameObject {
     ctx: CanvasRenderingContext2D;
     X: number;
     Y: number;
+    level: number;
+    exp: number;
     bullets: Projectile[];
+    skillList: string[];
+    bulletCount: number;
+    reloadTime: number;
 
     constructor(name: string,x: number,y: number) {
         super({x: 0, y: 0, width: 32, height: 75});
@@ -17,8 +22,13 @@ export default class Player extends GameObject {
         this.speed = 0.2;
         this.x = x;
         this.y = y;
+        this.level = 1;
+        this.exp = 0;
         this.health = 100;
         this.bullets = [];
+        this.skillList = ["speed","attack","health","exp","ammo","reload"];
+        this.bulletCount = 5;
+        this.reloadTime = 5000;
     }
     
     draw(ctx: CanvasRenderingContext2D, time: Number): void {
@@ -29,6 +39,11 @@ export default class Player extends GameObject {
     update(): void {
         if(this.health <= 0){
             SceneEngine.getInstance().currentScene.destroyGameObject(this);
+        }
+
+        if(this.exp >= 100){
+            this.level += 1;
+            this.exp = this.exp - 100;
         }
     }
 
