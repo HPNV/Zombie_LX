@@ -31,7 +31,7 @@ export default class Player extends GameObject {
         this.exp = 0;
         this.health = 100;
         this.bullets = [];
-        this.bulletCount = 5;
+        this.bulletCount = 10;
         this.reloadTime = 5000;
         this.image = Global.getInstance().assetManager.loadedImage["Player"];
         this.movingLeft = false;

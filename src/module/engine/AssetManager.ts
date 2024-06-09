@@ -40,6 +40,10 @@ export default class AssetManager {
         return this._loadedAudio;
     }
 
+    get totalAssets(): number {
+        return this._ipaths.length + this._apaths.length;
+    }
+
     constructor() {
         this._ipaths = [];
         this._apaths = [];

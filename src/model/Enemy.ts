@@ -1,6 +1,7 @@
 import GameObject from '../module/character/GameObject';
 import SceneEngine from '../module/engine/SceneEngine';
 import Global from '../module/helper/Global';
+import Projectile from './projectile';
 
 export default class Enemy extends GameObject {
     health: number;
@@ -10,9 +11,9 @@ export default class Enemy extends GameObject {
     image: ImageBitmap | null;
     movingLeft: boolean;
 
-    constructor(x: number, y: number, damage: number, image: string) {
+    constructor(x: number, y: number, damage: number, health: number, image: string) {
         super({ x: x, y: y, width: 64, height: 70 });
-        this.maxHealth = 20;
+        this.maxHealth = health;
         this.health = this.maxHealth;
         this.speed = 0.1;
         this.damage = damage;
@@ -22,22 +23,21 @@ export default class Enemy extends GameObject {
 
     draw(ctx: CanvasRenderingContext2D, time: Number): void {
         if (this.image) {
-            ctx.save(); // Save the current state
+            ctx.save();
 
             if (this.movingLeft) {
-                ctx.translate(this.x + this.width, this.y); // Move the origin to the sprite's position
-                ctx.scale(-1, 1); // Flip the sprite horizontally
+                ctx.translate(this.x + this.width, this.y);
+                ctx.scale(-1, 1);
                 ctx.drawImage(this.image, 0, 0, this.width, this.height);
             } else {
                 ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
             }
 
-            ctx.restore(); // Restore the previous state
+            ctx.restore();
         } else {
             ctx.fillStyle = "blue";
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
-
         this.drawHealthBar(ctx);
     }
 
@@ -68,5 +68,15 @@ export default class Enemy extends GameObject {
 
         this.x = newX;
         this.y = newY;
+    }
+
+    attack(mouseX: number, mouseY: number): Projectile {
+        var angle = Math.atan2(mouseY - this.y, mouseX - this.x);
+        var dx = Math.cos(angle);
+        var dy = Math.sin(angle);
+        this.x += dx;
+        this.y += dy;
+        var projectile = new Projectile(this.x, this.y, angle, 2, 10, "Bbullet");
+        return projectile
     }
 }

@@ -18,6 +18,9 @@ window.onload = () =>{
                 assetManager.addAudioPath("PlayMusic","PlayMusic.mp3");
                 assetManager.addImagePath("Card","Helper/Card.png");
                 assetManager.addImagePath("Start","Helper/Start.png");
+                assetManager.addImagePath("Boss","Enemy/Boss.png");
+                assetManager.addImagePath("YouWin","Helper/YouWin.png");
+                assetManager.addImagePath("Bbullet","Enemy/BossBullet.png");
 
                 for(let i = 1; i < 10; i++){
                         assetManager.addImagePath("tile"+i,"tiles/FieldsTile_0"+i+".png");
