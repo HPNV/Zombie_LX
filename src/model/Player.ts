@@ -5,7 +5,8 @@ import Projectile from './projectile';
 
 export default class Player extends GameObject {
     name: string;
-    public speed: number;
+    baseSpeed: number;
+    speed: number;
     health: number;
     ctx: CanvasRenderingContext2D;
     X: number;
@@ -22,7 +23,8 @@ export default class Player extends GameObject {
     constructor(name: string, x: number, y: number) {
         super({ x: 0, y: 0, width: 100, height: 100 });
         this.name = name;
-        this.speed = 0.2;
+        this.speed = 0;
+        this.baseSpeed = 0.2;
         this.x = x;
         this.y = y;
         this.level = 1;
@@ -95,7 +97,7 @@ export default class Player extends GameObject {
     }
 
     setSpeed(deltaTime: number): void {
-        this.speed = 0.2 * deltaTime;
+        this.speed = this.baseSpeed * deltaTime;
         this.bullets.forEach(bullet => {
             bullet.setSpeed(bullet.speed * deltaTime);
         });

@@ -23,16 +23,19 @@ export default class Scene1 extends Scene {
     expBar: ProgressBar = new ProgressBar(32, this.map.getTop() + 64, 0, 'blue', 100, 25);
     liveBar: ProgressBar = new ProgressBar(32, this.map.getTop() + 32, 0, 'green', 100, 25);
     lvlText: TextRender = new TextRender(150, this.map.getTop() + 64, `${Math.floor(this.player.level)}`, 25, 25);
+    startIamge: ImageRender = new ImageRender(this.map.getRight() / 5 - 50, this.map.getBottom() / 5 - 50, "Start");
     lvlCounter: number = this.player.level + 1;
     pause: boolean = false;
     curretTime: number = 0;
     checkSpawn: number = 0;
     checkReload: number = 0;
-    image: ImageRender[] = [];
+    checkDifficulty: number = 0;
     gameOverImage: ImageBitmap | null = null;
     gameMusic: AudioRender = new AudioRender("PlayMusic");
-    skillList: string[] = ["speed", "attack", "health", "exp", "ammo", "reload"];
     skillCardList: SkillCard[] = [];
+    musicPlayed: boolean = false;
+    hasStarted: boolean = false;
+    spawnRate: number = 3000;
 
     onCreated(): void {
         this.addGameObject(this.player);
@@ -46,20 +49,14 @@ export default class Scene1 extends Scene {
         this.addGameObject(this.liveBar);
         this.addGameObject(this.lvlText);
         this.addGameObject(this.gameMusic);
-        this.gameMusic.play();
+        this.addGameObject(this.startIamge);
 
         this.liveBar.height = 25;
         this.expBar.height = 25;
         this.liveBar.width = this.player.health * 2;
         this.expBar.width = 100;
         this.player.exp = 99;
-
-        this.reload();
-
-        this.image.forEach(img => {
-            this.addGameObject(img);
-        });
-
+        
         this.gameOverImage = Global.getInstance().assetManager.loadedImage["gameover"];
     }
 
@@ -79,11 +76,24 @@ export default class Scene1 extends Scene {
         let deltaTime = SceneEngine.getInstance().deltaTimeMilli();
         this.curretTime = this.curretTime + deltaTime;
 
-        console.log(this.player);
-
         this.liveBar.value = this.player.health * 2;
         this.expBar.value = this.player.exp;
         this.lvlText.text = `${Math.floor(this.player.level)}`;
+
+        if(!this.hasStarted){
+            this.pause = true;
+            this.mouseClick = (e) => {
+                console.log(e.pageX, e.pageY);
+                console.log(this.startIamge.x, this.startIamge.y);
+                if (this.startIamge.clicked(e.pageX, e.pageY)) {
+                    
+                    this.hasStarted = true;
+                    this.destroyGameObject(this.startIamge);
+                    this.gameMusic.play();
+                    this.pause = false;
+                }
+            }
+        }
 
         if (this.player.health <= 0 && !this.pause) {
             player.health = 0;
@@ -91,7 +101,8 @@ export default class Scene1 extends Scene {
         }
 
         if (this.player.level >= this.lvlCounter && !this.pause) {
-            let tempSkillList = this.skillList;
+            let tempSkillList = ["speed", "attack", "health", "exp", "ammo", "reload"];
+            this.lvlCounter += 1;
             for (let i = 0; i < 3; i++) {
                 const randomIndex = Math.floor(Math.random() * tempSkillList.length);
                 let skill = new SkillCard((this.map.getRight() / 5) + ((i * 300)) , this.map.getBottom() / 5, tempSkillList[randomIndex]);
@@ -109,14 +120,14 @@ export default class Scene1 extends Scene {
                     if (card.clicked(e.pageX, e.pageY)) {
                         switch (card.text) {
                             case "speed":
-                                this.player.speed += 1;
+                                this.player.baseSpeed += 0.1;
                                 break;
                             case "attack":
                                 this.player.damage += 3;
                                 break;
                             case "health":
                                 this.player.health += 10;
-                                this.liveBar.width = this.player.health * 2;
+                                this.liveBar.width = this.liveBar.width + 20;
                                 break;
                             case "exp":
                                 this.player.exp += 10;
@@ -132,7 +143,6 @@ export default class Scene1 extends Scene {
                             this.destroyGameObject(card);
                         });
                         this.skillCardList = [];
-                        this.lvlCounter += 1;
                         this.pause = false;
                     }
                 });
@@ -159,7 +169,12 @@ export default class Scene1 extends Scene {
             }
         }
 
-        if ((this.curretTime - this.checkSpawn) >= 3000) {
+        if(this.curretTime - this.checkDifficulty >= 10000){
+            this.spawnRate -= 250;
+            this.checkDifficulty = this.curretTime;
+        }
+
+        if ((this.curretTime - this.checkSpawn) >= this.spawnRate) {
             this.spawnEnemy();
             this.checkSpawn = this.curretTime;
         }
@@ -193,12 +208,6 @@ export default class Scene1 extends Scene {
                 this.playerBullet.splice(this.playerBullet.indexOf(bullet), 1);
             }
         });
-    }
-
-    reload() {
-        for (let i = 0; i < 5; i++) {
-            this.image.push(new ImageRender((i * 32) + 32, this.map.getTop() + 96, "bullet"));
-        }
     }
 
     enemyCollide() {
